@@ -1,23 +1,26 @@
 // use tauri::Manager;
 
-// mod editor;
+use tauri::Manager;
+
+mod editor;
 mod fs;
+mod platform;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        // .setup(|app| {
-        //     app.manage(editor::EditorState::new("Hello from Rust core"));
-        //     Ok(())
-        // })
+        .setup(|app| {
+            #[cfg(debug_assertions)] // only include this code on debug builds
+            {
+                let window = app.get_webview_window("main").unwrap();
+                window.open_devtools();
+                window.close_devtools();
+            }
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
-        // .invoke_handler(tauri::generate_handler![
-        //     editor::get_editor_state,
-        //     editor::insert_at_cursor,
-        //     editor::update_selection,
-        //     editor::set_cursor,
-        //     editor::delete_at_cursor
-        // ])
+        .plugin(tauri_plugin_os::init())
+        .invoke_handler(tauri::generate_handler![platform::get_platform,])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

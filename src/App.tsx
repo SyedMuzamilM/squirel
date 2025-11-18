@@ -3,7 +3,7 @@ import { Editor } from "./Editor";
 
 function App() {
   return (
-    <main className="bg-slate-800">
+    <main className="bg-slate-800 h-screen w-full">
       <Editor />
     </main>
   );
