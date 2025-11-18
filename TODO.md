@@ -9,11 +9,11 @@ Desktop code/text editor where:
 ---
 
 ## 0. Groundwork
-- [ ] Set up base stack
-  - [ ] Install Rust toolchain (stable), Node, pnpm/yarn
-  - [ ] Create Tauri + React template (`tauri create` or equivalent)
-  - [ ] Verify React hot reload works
-  - [ ] Verify a Rust command is callable from React
+- [x] Set up base stack
+  - [x] Install Rust toolchain (stable), Node, pnpm/yarn
+  - [x] Create Tauri + React template (`tauri create` or equivalent)
+  - [x] Verify React hot reload works
+  - [x] Verify a Rust command is callable from React
 - [ ] Define initial scope
   - [ ] Single file editor
   - [ ] Basic operations: insert, delete, move cursor, select, load/save file
