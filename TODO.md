@@ -21,26 +21,26 @@ Desktop code/text editor where:
 
 ## 1. Basic Tauri–React wiring
 - [ ] Define IPC style
-  - [ ] Use `tauri::command` for request/response calls
+  - [x] Use `tauri::command` for request/response calls
   - [ ] Use Tauri events (`app_handle.emit_all`) for push updates from Rust to UI
-- [ ] Implement trivial example
-  - [ ] `get_app_info` command returning a struct from Rust
-  - [ ] Call it from React and show result
-  - [ ] Implement one event (e.g., `ping`) emitted by Rust, listened in React
+- [x] Implement trivial example
+  - [x] `get_platform` command
+  - [x] Call it from React and show result
+  - [x] Implement one event (e.g., `ping`) emitted by Rust, listened in React
 
 ## 2. Minimal editor UI (React only, string buffer)
-- [ ] Editor UI skeleton
-  - [ ] Main layout: sidebar (optional), top bar, editor area
-  - [ ] Use a `<div contentEditable>` or `<textarea>` for initial text display
-  - [ ] Use React state with a single `text: string`
-- [ ] Keyboard handling
-  - [ ] Let browser handle text editing for now
-  - [ ] Attach keydown handlers to capture arrow keys
-  - [ ] Handle Enter, Backspace/Del
-  - [ ] Handle Ctrl/Cmd + S
-- [ ] File open/save (UI stub)
-  - [ ] Add "Open", "Save" buttons or menu items
-  - [ ] Wire these to stub functions in React (no Rust yet)
+- [x] Editor UI skeleton
+  - [x] Main layout: sidebar (optional), top bar, editor area
+  - [x] Use a `<div contentEditable>` or `<textarea>` for initial text display
+  - [x] Use React state with a single `text: string`
+- [x] Keyboard handling
+  - [x] Let browser handle text editing for now
+  - [x] Attach keydown handlers to capture arrow keys
+  - [x] Handle Enter, Backspace/Del
+  - [x] Handle Ctrl/Cmd + S
+- [x] File open/save (UI stub)
+  - [x] Add "Open", "Save" buttons or menu items
+  - [x] Wire these to stub functions in React (no Rust yet)
 
 ## 3. Move buffer & cursor logic into Rust
 - [ ] Define core Rust data structures

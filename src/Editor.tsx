@@ -6,6 +6,14 @@ export const Editor = () => {
   const [cursorPosition, setCursorPosition] = useState({ row: 1, column: 1 });
   const editorRef = useRef<HTMLDivElement>(null);
 
+  const handleSave = useCallback(() => {
+    console.log("save");
+  }, []);
+
+  const handleOpen = useCallback(() => {
+    console.log("open");
+  }, []);
+
   useEffect(() => {
     const handler = async (event: KeyboardEvent) => {
       const platform = await getPlatform();
@@ -17,11 +25,11 @@ export const Editor = () => {
         event.preventDefault();
 
         if (event.key === "s") {
-          console.log("save");
+          handleSave();
         }
 
         if (event.key === "o") {
-          console.log("open");
+          handleOpen();
         }
       }
     };
@@ -31,7 +39,7 @@ export const Editor = () => {
     return () => {
       window.removeEventListener("keydown", handler);
     };
-  }, []);
+  }, [handleOpen, handleSave]);
 
   const updateCursorPosition = useCallback(() => {
     const selection = window.getSelection();
@@ -97,8 +105,24 @@ export const Editor = () => {
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-900">
       {/* Top Bar */}
-      <header className="bg-gray-800 text-white px-4 py-2 border-b border-gray-700 flex items-center">
+      <header className="bg-gray-800 text-white px-4 py-2 border-b border-gray-700 flex items-center justify-between">
         <h1 className="text-sm font-medium">{fileName}</h1>
+        <div className="flex items-center gap-2 text-xs">
+          <button
+            className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 transition-colors"
+            type="button"
+            onClick={handleOpen}
+          >
+            Open
+          </button>
+          <button
+            className="px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 transition-colors"
+            type="button"
+            onClick={handleSave}
+          >
+            Save
+          </button>
+        </div>
       </header>
 
       {/* Editor Area */}
