@@ -1,10 +1,47 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getPlatform } from "./utils/platform";
+import { listen, UnlistenFn } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
+
+type Document = {
+  lines: Array<string>;
+  cursor: {
+    row: number;
+    col: number;
+  };
+  selection: {
+    start: {
+      row: number;
+      col: number;
+    };
+    end: {
+      row: number;
+      col: number;
+    };
+  };
+};
 
 export const Editor = () => {
   const [fileName] = useState("test.txt");
-  const [cursorPosition, setCursorPosition] = useState({ row: 1, column: 1 });
+  const [lines, setLines] = useState<Array<string>>([]);
+  const [cursorPosition, setCursorPosition] = useState({ row: 1, col: 1 });
   const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let unsubscribe: UnlistenFn;
+
+    (async () => {
+      unsubscribe = await listen<Document>("document_updated", (event) => {
+        const eventLines = event.payload.lines;
+        const cursor = event.payload.cursor;
+        console.log("Cursor:: ", cursor);
+        setCursorPosition(cursor);
+        setLines(eventLines);
+      });
+    })();
+
+    return () => unsubscribe && unsubscribe();
+  }, []);
 
   const handleSave = useCallback(() => {
     console.log("save");
@@ -90,16 +127,41 @@ export const Editor = () => {
     });
   }, []);
 
-  const handleInput = () => {
-    updateCursorPosition();
+  const handleKeyDown = async (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (
+      event.key === "ArrowRight" ||
+      event.key === "ArrowLeft" ||
+      event.key === "ArrowUp" ||
+      event.key === "ArrowDown"
+    ) {
+      await invoke("move_cursor", { movement: event.key });
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+    } else if (event.key.length !== 1) {
+      return;
+    }
+
+    const isEnter = event.key === "Enter";
+    if (isEnter) {
+      await invoke("insert_newline");
+    } else {
+      await invoke("insert_char", { ch: event.key });
+    }
   };
 
-  const handleClick = () => {
-    updateCursorPosition();
-  };
+  // const handleClick = () => {
+  //   updateCursorPosition();
+  // };
 
-  const handleKeyUp = () => {
-    updateCursorPosition();
+  // const handleKeyUp = () => {
+  //   updateCursorPosition();
+  // };
+
+  const handleEditorClick = () => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
   };
 
   return (
@@ -129,12 +191,37 @@ export const Editor = () => {
       <div
         ref={editorRef}
         contentEditable
-        className="flex-1 text-white bg-gray-900 px-4 py-3 font-mono text-sm outline-none overflow-auto"
-        onInput={handleInput}
-        onClick={handleClick}
-        onKeyUp={handleKeyUp}
+        className="opacity-0 z-0"
+        onKeyDown={handleKeyDown}
+        // onClick={handleClick}
+        // onKeyUp={handleKeyUp}
         spellCheck={false}
       />
+
+      <div
+        onClick={handleEditorClick}
+        className="relative flex-1 z-2 text-white bg-gray-900 font-mono text-sm outline-none overflow-auto"
+      >
+        {lines.map((line, index) => (
+          <div key={line} className="flex gap-2 h-6">
+            <span className="bg-gray-700 px-2 w-10 h-6 text-righ">
+              {index + 1}
+            </span>
+            <span className="flex-1">{line}</span>
+          </div>
+        ))}
+
+        {/* Cursor For now */}
+        <div
+          className="absolute"
+          style={{
+            top: `${cursorPosition.row * 24}px`,
+            left: `${48 + cursorPosition.col * 8}px`,
+          }}
+        >
+          <span className="bg-blue-500 h-6 w-0.5 animate-plus block" />
+        </div>
+      </div>
 
       {/* Bottom Status Bar */}
       <footer className="bg-gray-800 text-gray-400 px-4 py-1 border-t border-gray-700 flex items-center justify-between text-xs">
@@ -143,7 +230,7 @@ export const Editor = () => {
         </div>
         <div className="flex items-center gap-4">
           <span>
-            Ln {cursorPosition.row}, Col {cursorPosition.column}
+            Ln {cursorPosition.row + 1}, Col {cursorPosition.col}
           </span>
         </div>
       </footer>

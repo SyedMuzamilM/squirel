@@ -43,17 +43,17 @@ Desktop code/text editor where:
   - [x] Wire these to stub functions in React (no Rust yet)
 
 ## 3. Move buffer & cursor logic into Rust
-- [ ] Define core Rust data structures
-  - [ ] `Cursor` struct with line, column
-  - [ ] `Selection` struct with start, end cursors
-  - [ ] `Document` struct with lines: Vec<String>, cursor, selection, dirty flag, file_path
+- [x] Define core Rust data structures
+  - [x] `Cursor` struct with line, column
+  - [x] `Selection` struct with start, end cursors
+  - [x] `Document` struct with lines: Vec<String>, cursor, selection, dirty flag, file_path
 - [ ] Document state management  
-  - [ ] Use `tauri::State` or `Arc<Mutex<EditorState>>`
-  - [ ] Implement `insert_char(ch)` method
-  - [ ] Implement `insert_string(s)` method
+  - [x] Use `tauri::State` or `Arc<Mutex<EditorState>>`
+  - [x] Implement `insert_char(ch)` method
+  - [x] Implement `insert_string(s)` method
   - [ ] Implement `delete_backward()` method
   - [ ] Implement `delete_forward()` method
-  - [ ] Implement `move_cursor_left/right/up/down()` methods
+  - [x] Implement `move_cursor_left/right/up/down()` methods
   - [ ] Implement `set_selection(start, end)` method
 - [ ] Commands for React
   - [ ] `load_document(path: String) -> SerializedDocument`
