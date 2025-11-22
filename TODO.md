@@ -72,17 +72,25 @@ Desktop code/text editor where:
 - [ ] React rendering strategy
   - [ ] Use a virtualized list for lines (Tanstack Virtual or custom)
   - [ ] Each line: `<div className="line"><span className="line-number">…</span><span className="code">…</span></div>`
+  - [ ] Compute visible line range based on scroll position and line height
+  - [ ] Render a small overscan buffer (lines above/below viewport) for smooth scrolling
+  - [ ] Manually test with 50k–100k line synthetic files for performance
 - [ ] Cursor rendering
   - [ ] Have Rust send `cursor` position
   - [ ] Render custom cursor: absolutely-positioned div based on line index and character width
   - [ ] Use monospaced font and fixed line height
+  - [ ] Support mouse click-to-move: map `(clientX, clientY)` to `(line, col)` using font metrics
+  - [ ] Add `set_cursor(line, col)` command in Rust and wire it from React
 - [ ] Selection rendering
   - [ ] Rust sends `selection`
   - [ ] For each line, compute which columns are selected
   - [ ] Split line into spans or draw semi-transparent overlay
 - [ ] Optimize snapshots
   - [ ] Accept that each edit returns full `SerializedDocument` for v1
-  - [ ] Plan for patch/delta optimization later
+  - [ ] Define `DocumentChange` enum in Rust (Insert, DeleteRange, UpdateCursor, UpdateSelection, etc.)
+  - [ ] Emit `DocumentChange` events instead of full document when possible
+  - [ ] Maintain a mirrored document in React and apply incoming `DocumentChange` deltas
+  - [ ] Add tests to ensure applying a sequence of deltas matches a fresh snapshot
 
 ## 5. File system integration
 - [ ] Open file
@@ -99,6 +107,11 @@ Desktop code/text editor where:
   - [ ] Reflect dirty state in UI (e.g., `*` in tab title)
 
 ## 6. Editing model v2: better buffer & undo/redo
+- [ ] Explore buffer strategies
+  - [ ] Keep current `Vec<String>` implementation as baseline behind a `TextBuffer`-style trait
+  - [ ] Implement a simple gap buffer as a learning exercise (optimized for edits near cursor)
+  - [ ] Prototype using `ropey` (rope-based text buffer) and compare complexity/performance
+  - [ ] Decide which buffer type (gap buffer, piece table, rope) is the default for v2
 - [ ] Replace naive `Vec<String>` with piece table
   - [ ] Two buffers: original file, add buffer  
   - [ ] Document as list of pieces (buffer ref + start + length)
@@ -112,6 +125,11 @@ Desktop code/text editor where:
   - [ ] When applying edit: push inverse into `past`, clear `future`
   - [ ] Implement `undo()` command
   - [ ] Implement `redo()` command
+- [ ] Unicode-aware editing
+  - [ ] Integrate `unicode-segmentation` or similar crate for grapheme cluster handling
+  - [ ] Represent cursor/selection positions in terms of grapheme clusters, not raw bytes
+  - [ ] Ensure Backspace/Delete remove entire grapheme clusters (e.g., emojis, combining marks)
+  - [ ] Add unit tests for emoji, accented characters, and multi-codepoint graphemes
 - [ ] Keyboard bindings in React
   - [ ] Map Ctrl/Cmd + Z to `undo` command
   - [ ] Map Ctrl/Cmd + Shift + Z / Ctrl + Y to `redo`
