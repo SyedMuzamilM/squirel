@@ -28,6 +28,7 @@ pub fn run() {
             editor::insert_char,
             editor::insert_newline,
             editor::insert_string,
+            editor::delete_backward,
             editor::move_cursor
         ])
         .run(tauri::generate_context!())

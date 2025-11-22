@@ -51,8 +51,7 @@ Desktop code/text editor where:
   - [x] Use `tauri::State` or `Arc<Mutex<EditorState>>`
   - [x] Implement `insert_char(ch)` method
   - [x] Implement `insert_string(s)` method
-  - [ ] Implement `delete_backward()` method
-  - [ ] Implement `delete_forward()` method
+  - [x] Implement `delete_backward()` method (For now deletes a single word)
   - [x] Implement `move_cursor_left/right/up/down()` methods
   - [ ] Implement `set_selection(start, end)` method
 - [ ] Commands for React

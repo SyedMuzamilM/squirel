@@ -23,7 +23,7 @@ type Document = {
 
 export const Editor = () => {
   const [fileName] = useState("test.txt");
-  const [lines, setLines] = useState<Array<string>>([]);
+  const [lines, setLines] = useState<Array<string>>([""]);
   const [cursorPosition, setCursorPosition] = useState({ row: 1, col: 1 });
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -32,9 +32,8 @@ export const Editor = () => {
 
     (async () => {
       unsubscribe = await listen<Document>("document_updated", (event) => {
-        const eventLines = event.payload.lines;
+        const eventLines = event.payload.lines || [""];
         const cursor = event.payload.cursor;
-        console.log("Cursor:: ", cursor);
         setCursorPosition(cursor);
         setLines(eventLines);
       });
@@ -78,55 +77,6 @@ export const Editor = () => {
     };
   }, [handleOpen, handleSave]);
 
-  const updateCursorPosition = useCallback(() => {
-    const selection = window.getSelection();
-
-    if (!selection || !editorRef.current) return;
-    const textContent = editorRef.current.innerText;
-
-    const range = selection.getRangeAt(0);
-    const cursorOffset = range.startOffset;
-
-    const preRange = document.createRange();
-    preRange.selectNodeContents(editorRef.current);
-    preRange.setEnd(range.startContainer, range.startOffset);
-
-    const preRangeText = preRange.toString();
-    const allLines = textContent.split("\n");
-    let reconstructed = "";
-    let preRangeIndex = 0;
-
-    for (let i = 0; i < allLines.length; i++) {
-      const line = allLines[i];
-
-      if (preRangeIndex < preRangeText.length) {
-        const remainingPreRange = preRangeText.substring(preRangeIndex);
-
-        if (remainingPreRange.startsWith(line)) {
-          reconstructed += line;
-          preRangeIndex += line.length;
-
-          if (preRangeIndex < preRangeText.length && i < allLines.length - 1) {
-            reconstructed += "\n";
-          }
-        } else {
-          const remainingText = remainingPreRange;
-          reconstructed += remainingText;
-          break;
-        }
-      }
-
-      if (preRangeIndex >= preRangeText.length) return;
-    }
-
-    const lines = reconstructed.split("\n");
-
-    setCursorPosition({
-      row: lines.length,
-      column: cursorOffset,
-    });
-  }, []);
-
   const handleKeyDown = async (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (
       event.key === "ArrowRight" ||
@@ -135,6 +85,10 @@ export const Editor = () => {
       event.key === "ArrowDown"
     ) {
       await invoke("move_cursor", { movement: event.key });
+    }
+
+    if (event.key === "Backspace") {
+      await invoke("delete_backward");
     }
 
     if (event.key === "Enter") {
@@ -189,16 +143,6 @@ export const Editor = () => {
 
       {/* Editor Area */}
       <div
-        ref={editorRef}
-        contentEditable
-        className="opacity-0 z-0"
-        onKeyDown={handleKeyDown}
-        // onClick={handleClick}
-        // onKeyUp={handleKeyUp}
-        spellCheck={false}
-      />
-
-      <div
         onClick={handleEditorClick}
         className="relative flex-1 z-2 text-white bg-gray-900 font-mono text-sm outline-none overflow-auto"
       >
@@ -213,15 +157,25 @@ export const Editor = () => {
 
         {/* Cursor For now */}
         <div
-          className="absolute"
+          className="absolute animate-cursor"
           style={{
             top: `${cursorPosition.row * 24}px`,
             left: `${48 + cursorPosition.col * 8}px`,
           }}
         >
-          <span className="bg-blue-500 h-6 w-0.5 animate-plus block" />
+          <span className="bg-blue-500 h-5 w-0.5 animate-plus block" />
         </div>
       </div>
+
+      <div
+        ref={editorRef}
+        contentEditable
+        className="opacity-0 z-0"
+        onKeyDown={handleKeyDown}
+        // onClick={handleClick}
+        // onKeyUp={handleKeyUp}
+        spellCheck={false}
+      />
 
       {/* Bottom Status Bar */}
       <footer className="bg-gray-800 text-gray-400 px-4 py-1 border-t border-gray-700 flex items-center justify-between text-xs">
